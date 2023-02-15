@@ -138,9 +138,19 @@ class Obstacle:
             case 4: WINDOW.blit(img_cactus4, convert(self.X, self.Y, 196)) #仙人掌4
             case 5: WINDOW.blit(img_cactus5, convert(self.X, self.Y, 195)) #仙人掌5
             case 6: WINDOW.blit(img_cactus6, convert(self.X, self.Y, 192)) #仙人掌6
-            case 7: bird(self) #鸟
-            case 8: bird(self) #鸟
-            case 9: bird(self) #鸟
+            case 7: self.bird() #鸟
+            case 8: self.bird() #鸟
+            case 9: self.bird() #鸟
+    def bird(self):
+        if FRAME%20 < 10:
+            WINDOW.blit(img_bird1, convert(self.X, self.Y, 153))
+        else:
+            WINDOW.blit(img_bird2, convert(self.X, self.Y, 153))
+    def hitbox(self, dino):
+        return dino.X + dino.length > self.X \
+        and dino.X < self.X + self.length \
+        and dino.Y > self.Y - self.height \
+        and dino.Y - dino1.height < self.Y 
 
 class Background:
     def __init__(self,speed,X_min,X_max,Y_min,Y_max,imgs):
@@ -209,7 +219,7 @@ class Road:
             self.X = 0
         self.X -= GAMESPEED
         WINDOW.blit(img_road, (self.X, self.Y))
-        
+# 创建实例
 dino1=DinoSaur(10)
 obstacle1=Obstacle()
 obstacle2=Obstacle()
@@ -223,7 +233,7 @@ star3=Star()
 star4=Star()
 moon=Moon()
 road1=Road()
-
+# 渐变反转颜色
 def reverse_color():
     global rgb
     if SCORE % 1000 > 950:
@@ -235,16 +245,10 @@ def reverse_color():
     pixels ^= int(('{:02X}' * 3).format(rgb,rgb,rgb),16)
     del pixels
 
-def bird(self):
-    if FRAME%20 < 10:
-        WINDOW.blit(img_bird1, convert(self.X, self.Y, 153))
-    else:
-        WINDOW.blit(img_bird2, convert(self.X, self.Y, 153))
-
 def convert(X, Y, img_height):
     """仅用于恐龙和障碍，转换图像绘制起点为左下角"""
     return (X, Y - img_height)
-
+# 获取历史最高分
 def get_history_score():
     try:
         with open("record.txt", "r") as f:
@@ -254,7 +258,7 @@ def get_history_score():
         with open("record.txt", "w") as f:
             f.write("0")
         return 0
-
+# 显示分数
 def show_score(score,hi_score):
     num_images = {
         "0": img_0,
@@ -268,7 +272,7 @@ def show_score(score,hi_score):
         "8": img_8,
         "9": img_9
     }
-    #图片闪烁效果
+    #满足条件时score向下取整百
     if score > 100 and GAMESTATE == True:
         if score % 100 < 30:
             score = score // 100 * 100
@@ -288,6 +292,7 @@ def show_score(score,hi_score):
     WINDOW.blit(images[2],(2050,100))
     WINDOW.blit(images[3],(2100,100))
     WINDOW.blit(images[4],(2150,100))
+    # 满足条件时闪烁
     if not(SCORE>100 and GAMESTATE \
         and(0 < SCORE % 100 <=5 \
         or 10 < SCORE % 100 <=15 \
@@ -298,6 +303,7 @@ def show_score(score,hi_score):
         WINDOW.blit(images[8],(2400,100))
         WINDOW.blit(images[9],(2450,100))
 
+# 启动动画
 def start_animation():
     clock = pygame.time.Clock()
     start = False
@@ -313,17 +319,18 @@ def start_animation():
         clock.tick(100) #FPS
         WINDOW.fill((255, 255, 255))
         WINDOW.blit(img_road, (road1.X, road1.Y))
-        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200, 0, 2560, 1080)) # hide road1
+        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200, 0, 2560, 1080)) # 用白色矩形填充右侧屏幕
         INPUT = pygame.key.get_pressed()
+        # 等待，直到按下空格
         if INPUT[pygame.K_SPACE]:
             start = True
         if start == True:
             jump_frame -= 1
-            dino1.Y=GROUND-(3000 * jump_frame / 100 - (11111*jump_frame**2)/20000) # jump animation
+            dino1.Y=GROUND-(3000 * jump_frame / 100 - (11111*jump_frame**2)/20000) # 跳跃动画
         else:
             WINDOW.blit(text, (1150, 485))
         dino1.show()
-        # winking while waiting 
+        # 眨眼 
         if 800 < wink%1000 <= 830:
             pygame.draw.rect(WINDOW, (83,83,83), pygame.Rect(110, 595, 16, 16))
         SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
@@ -335,18 +342,19 @@ def start_animation():
         WINDOW.fill((255, 255, 255))
         WINDOW.blit(img_road, (road1.X, road1.Y))
         dino1.show()        
-        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200+50*i, 0, 2560, 1080)) # unhide road animation
+        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200+50*i, 0, 2560, 1080)) # 白色矩形向右移
         SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
         DISPLAY_WINDOW.blit(SCALE_WIN, (0, 0))
         pygame.display.flip()
     obstacle1.update(obstacle2)
     obstacle2.update(obstacle1)
-
+# 游戏结束界面
 def gameover():
     global GAMESTATE
     global GAMESPEED
     global NIGHT
     global FRAME
+    # 昼夜加载不同图片
     if NIGHT:
         WINDOW.blit(img_fail_n, convert(dino1.X, dino1.Y, 184))
         WINDOW.blit(img_gameover_n, (871, 350))
@@ -370,6 +378,7 @@ def gameover():
         clock = pygame.time.Clock()
         clock.tick(100) #FPS
         INPUT = pygame.key.get_pressed()
+        # 重新开始
         if INPUT[pygame.K_SPACE] == True:
             GAMESTATE=True
             GAMESPEED=15
@@ -377,14 +386,8 @@ def gameover():
             obstacle2.update(obstacle1)
             break
 
-
-def hitbox(obstacle):
-    return dino1.X + dino1.length > obstacle.X \
-    and dino1.X < obstacle.X + obstacle.length \
-    and dino1.Y > obstacle.Y - obstacle.height \
-    and dino1.Y - dino1.height < obstacle.Y 
-
 def menu():
+    # 游戏初始化
     global GAMESTATE
     global HISTORY
     HISTORY=get_history_score()
@@ -396,6 +399,7 @@ def menu():
     obstacle2.update(obstacle1)
     obstacle1.X=5000
     obstacle2.X=8000
+    # 等待按下空格
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -424,7 +428,7 @@ def main():
 
     ###############姿态控制###############
     INPUT = pygame.key.get_pressed()
-    #按下空格或上方向键，并且未处于蹲下或跳跃状态
+    #按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
     if (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
     and not (dino1.ducking or dino1.jumping):
         pygame.mixer.Sound.play(snd_press)
@@ -433,7 +437,7 @@ def main():
         gravity = 13000
         jump_speed = 2500
         jump_frame = max_jump_frame
-    #跳跃30帧之前按住空格和上方向键，切换小跳为大跳
+    #28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
     elif (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
     and not (jump_frame > 30 or jump_frame < 28 or dino1.bigjump or dino1.ducking):
         dino1.bigjump = True
@@ -476,10 +480,10 @@ def main():
         obstacle2.update(obstacle1)
     
     # 碰撞检测
-    if hitbox(obstacle1) or hitbox (obstacle2):
+    if obstacle1.hitbox(dino1) or obstacle2.hitbox(dino1):
         GAMESTATE=False
 
-    # 显示
+    # 显示物体
     if 700 <= SCORE % 1000 <= 999:
         moon.show()
         star1.show(star4)
@@ -506,18 +510,16 @@ def main():
     else:
         DISPLAY_WINDOW.blit(WINDOW,(0,0))
     pygame.display.flip()
-
+    # 速度调整
     if SCORE in range(0,160): GAMESPEED = 15
     if SCORE in range(160,320): GAMESPEED = 20
     if SCORE in range(320,500): GAMESPEED = 25
     if SCORE > 500 : GAMESPEED = 30
-
     if SCORE % 100 == 99:
         pygame.mixer.Sound.play(snd_reach_score)
 
     FRAME+=1
     SCORE=int(FRAME/5)
-
 
 menu()
 

@@ -6,7 +6,7 @@ GAMESPEED=20 # running speed
 FRAME=0 # frame
 SCORE=0 # score
 HISTORY=0 # highest score
-GROUND=766 #地面坐标
+GROUND=383 #地面坐标
 NIGHT=False
 jump_frame=1
 jump_speed=0
@@ -16,11 +16,7 @@ rgb=0
 # init window
 pygame.init()
 SCREEN_WIDTH= pygame.display.Info().current_w
-if SCREEN_WIDTH < 2560:
-    DISPLAY_WINDOW = pygame.display.set_mode((1920,800),pygame.HWACCEL)
-else:
-    DISPLAY_WINDOW = pygame.display.set_mode((2560,1080),pygame.HWACCEL)
-WINDOW = pygame.Surface((2560, 1080))
+WINDOW = pygame.display.set_mode((1280,540),pygame.HWACCEL)
 img_title=pygame.image.load(os.path.join("images/others", "img_title.png"))
 pygame.display.set_caption('Chrome dino')
 pygame.display.set_icon(img_title)
@@ -76,8 +72,8 @@ class DinoSaur:
     def __init__(self,X):
         self.X = X
         self.Y = GROUND
-        self.length = 150
-        self.height = 184
+        self.length = 75
+        self.height = 92
         self.jumping = False
         self.ducking = False
         self.dropping = False
@@ -92,11 +88,11 @@ class DinoSaur:
         if self.jumping:
             index+=4
         match index:
-            case 1:WINDOW.blit(img_running1, convert(self.X, self.Y, 184))
-            case 2:WINDOW.blit(img_running2, convert(self.X, self.Y, 184))
-            case 3:WINDOW.blit(img_ducking1, convert(self.X, self.Y, 111))
-            case 4:WINDOW.blit(img_ducking2, convert(self.X, self.Y, 111))
-            case _:WINDOW.blit(img_jumping,  convert(self.X, self.Y, 184))
+            case 1:WINDOW.blit(img_running1, convert(self.X, self.Y, 92))
+            case 2:WINDOW.blit(img_running2, convert(self.X, self.Y, 92))
+            case 3:WINDOW.blit(img_ducking1, convert(self.X, self.Y, 56))
+            case 4:WINDOW.blit(img_ducking2, convert(self.X, self.Y, 56))
+            case _:WINDOW.blit(img_jumping,  convert(self.X, self.Y, 92))
 
 class Obstacle:
     def __init__(self):
@@ -108,23 +104,23 @@ class Obstacle:
         self.speed = GAMESPEED
 
     def update(self,another):
-        self.X=another.X+random.randrange(1500,4000)
+        self.X=another.X+random.randrange(1250,3000)
         self.type=random.randrange(1,9)
         if self.type > 6:
-            self.Y = GROUND-random.randrange(0,300)
+            self.Y = GROUND-random.randrange(0,150)
             self.speed = GAMESPEED+random.randrange(0,GAMESPEED//7)
         else:
             self.Y = GROUND
         match self.type:
-            case 1: self.length=60  ; self.height=141 #仙人掌1
-            case 2: self.length=130 ; self.height=141 #仙人掌2
-            case 3: self.length=200 ; self.height=141 #仙人掌3
-            case 4: self.length=90  ; self.height=196 #仙人掌4
-            case 5: self.length=200 ; self.height=195 #仙人掌5
-            case 6: self.length=290 ; self.height=192 #仙人掌6
-            case 7: self.length=140 ; self.height=153 #鸟
-            case 8: self.length=140 ; self.height=153 #鸟
-            case 9: self.length=140 ; self.height=153 #鸟
+            case 1: self.length=30  ; self.height=71 #仙人掌1
+            case 2: self.length=65 ; self.height=71 #仙人掌2
+            case 3: self.length=100 ; self.height=71 #仙人掌3
+            case 4: self.length=45  ; self.height=98 #仙人掌4
+            case 5: self.length=100 ; self.height=98 #仙人掌5
+            case 6: self.length=145 ; self.height=96 #仙人掌6
+            case 7: self.length=70 ; self.height=77 #鸟
+            case 8: self.length=70 ; self.height=77 #鸟
+            case 9: self.length=70 ; self.height=77 #鸟
 
     def show(self):
         if self.type>6:
@@ -132,20 +128,20 @@ class Obstacle:
         else:
             self.X-=GAMESPEED
         match self.type:
-            case 1: WINDOW.blit(img_cactus1, convert(self.X, self.Y, 141)) #仙人掌1
-            case 2: WINDOW.blit(img_cactus2, convert(self.X, self.Y, 141)) #仙人掌2
-            case 3: WINDOW.blit(img_cactus3, convert(self.X, self.Y, 141)) #仙人掌3
-            case 4: WINDOW.blit(img_cactus4, convert(self.X, self.Y, 196)) #仙人掌4
-            case 5: WINDOW.blit(img_cactus5, convert(self.X, self.Y, 195)) #仙人掌5
-            case 6: WINDOW.blit(img_cactus6, convert(self.X, self.Y, 192)) #仙人掌6
+            case 1: WINDOW.blit(img_cactus1, convert(self.X, self.Y, 71)) #仙人掌1
+            case 2: WINDOW.blit(img_cactus2, convert(self.X, self.Y, 71)) #仙人掌2
+            case 3: WINDOW.blit(img_cactus3, convert(self.X, self.Y, 71)) #仙人掌3
+            case 4: WINDOW.blit(img_cactus4, convert(self.X, self.Y, 98)) #仙人掌4
+            case 5: WINDOW.blit(img_cactus5, convert(self.X, self.Y, 98)) #仙人掌5
+            case 6: WINDOW.blit(img_cactus6, convert(self.X, self.Y, 96)) #仙人掌6
             case 7: self.bird() #鸟
             case 8: self.bird() #鸟
             case 9: self.bird() #鸟
     def bird(self):
         if FRAME%20 < 10:
-            WINDOW.blit(img_bird1, convert(self.X, self.Y, 153))
+            WINDOW.blit(img_bird1, convert(self.X, self.Y, 77))
         else:
-            WINDOW.blit(img_bird2, convert(self.X, self.Y, 153))
+            WINDOW.blit(img_bird2, convert(self.X, self.Y, 77))
     def hitbox(self, dino):
         return dino.X + dino.length > self.X \
         and dino.X < self.X + self.length \
@@ -154,8 +150,8 @@ class Obstacle:
 
 class Background:
     def __init__(self,speed,X_min,X_max,Y_min,Y_max,imgs):
-        self.X=-101
-        self.Y=-3
+        self.X=-51
+        self.Y=-2
         self.speed=speed
         self.X_min=X_min
         self.X_max=X_max
@@ -165,7 +161,7 @@ class Background:
         self.img=random.choice(imgs)
     def show(self,another):
         self.X-=self.speed
-        if self.X < -100:
+        if self.X < -5:
             self.X=another.X+random.randrange(self.X_min,self.X_max)
             self.Y=random.randrange(self.Y_min,self.Y_max)
             self.img=random.choice(self.imgs)
@@ -174,30 +170,30 @@ class Background:
 class Cloud(Background):
     def __init__(self):
         speed=GAMESPEED/2
-        X_min=1000
-        X_max=2000
-        Y_min=200
-        Y_max=500
+        X_min=500
+        X_max=1000
+        Y_min=100
+        Y_max=250
         imgs=[img_cloud]
         super().__init__(speed, X_min, X_max, Y_min, Y_max, imgs)
 
 class Star(Background):
     def __init__(self):
         speed=GAMESPEED/5
-        X_min=500
-        X_max=1500
-        Y_min=100
-        Y_max=400
+        X_min=250
+        X_max=750
+        Y_min=50
+        Y_max=200
         imgs = [img_star1,img_star2,img_star3]
         super().__init__(speed, X_min, X_max, Y_min, Y_max, imgs)
 
 class Moon(Background):
     def __init__(self):
         speed=GAMESPEED/10
-        X_min=2560
-        X_max=2561
-        Y_min=150
-        Y_max=151
+        X_min=1280
+        X_max=1281
+        Y_min=75
+        Y_max=76
         imgs = [img_moon1,img_moon2,img_moon3,img_moon4,img_moon5,img_moon6,img_moon7]
         super().__init__(speed, X_min, X_max, Y_min, Y_max, imgs)
         self.current_img = 1
@@ -205,17 +201,17 @@ class Moon(Background):
         self.X-=self.speed
         if NIGHT == False:
             self.current_img = (self.current_img + 1) % len(self.imgs)
-            self.X=2560
-            self.Y=150
+            self.X=1280
+            self.Y=75
         self.img = self.imgs[self.current_img]
         WINDOW.blit(self.img, (self.X,self.Y))
 
 class Road:
     def __init__(self):
         self.X=0
-        self.Y=GROUND-44
+        self.Y=GROUND-22
     def show(self):
-        if self.X < -5120:
+        if self.X < -2560:
             self.X = 0
         self.X -= GAMESPEED
         WINDOW.blit(img_road, (self.X, self.Y))
@@ -286,28 +282,28 @@ def show_score(score,hi_score):
         image = num_images[num]
         images.append(image)
 
-    WINDOW.blit(img_hi,(1825,100))
-    WINDOW.blit(images[0],(1950,100))
-    WINDOW.blit(images[1],(2000,100))
-    WINDOW.blit(images[2],(2050,100))
-    WINDOW.blit(images[3],(2100,100))
-    WINDOW.blit(images[4],(2150,100))
+    WINDOW.blit(img_hi,(913,50))
+    WINDOW.blit(images[0],(975,50))
+    WINDOW.blit(images[1],(1000,50))
+    WINDOW.blit(images[2],(1025,50))
+    WINDOW.blit(images[3],(1050,50))
+    WINDOW.blit(images[4],(1075,50))
     # 满足条件时闪烁
-    if not(SCORE>100 and GAMESTATE \
-        and(0 < SCORE % 100 <=5 \
-        or 10 < SCORE % 100 <=15 \
+    if not(SCORE>100 and GAMESTATE
+        and(0 < SCORE % 100 <=5
+        or 10 < SCORE % 100 <=15
         or 20 < SCORE % 100 <=25)): 
-        WINDOW.blit(images[5],(2250,100))
-        WINDOW.blit(images[6],(2300,100))
-        WINDOW.blit(images[7],(2350,100))
-        WINDOW.blit(images[8],(2400,100))
-        WINDOW.blit(images[9],(2450,100))
+        WINDOW.blit(images[5],(1125,50))
+        WINDOW.blit(images[6],(1150,50))
+        WINDOW.blit(images[7],(1175,50))
+        WINDOW.blit(images[8],(1200,50))
+        WINDOW.blit(images[9],(1225,50))
 
 # 启动动画
 def start_animation():
     clock = pygame.time.Clock()
     start = False
-    font = pygame.font.Font('freesansbold.ttf', 30)
+    font = pygame.font.Font('freesansbold.ttf', 15)
     text = font.render("Press space to play", True, (0, 0, 0))
     wink=0
     global jump_frame
@@ -319,22 +315,20 @@ def start_animation():
         clock.tick(100) #FPS
         WINDOW.fill((255, 255, 255))
         WINDOW.blit(img_road, (road1.X, road1.Y))
-        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200, 0, 2560, 1080)) # 用白色矩形填充右侧屏幕
+        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(100, 0, 1280, 540)) # 用白色矩形填充右侧屏幕
         INPUT = pygame.key.get_pressed()
         # 等待，直到按下空格
         if INPUT[pygame.K_SPACE]:
             start = True
         if start == True:
             jump_frame -= 1
-            dino1.Y=GROUND-(3000 * jump_frame / 100 - (11111*jump_frame**2)/20000) # 跳跃动画
+            dino1.Y=GROUND-(2100 * jump_frame / 100 - (8000*jump_frame**2)/20000) # 跳跃动画
         else:
-            WINDOW.blit(text, (1150, 485))
+            WINDOW.blit(text, (575, 242))
         dino1.show()
         # 眨眼 
         if 800 < wink%1000 <= 830:
-            pygame.draw.rect(WINDOW, (83,83,83), pygame.Rect(110, 595, 16, 16))
-        SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
-        DISPLAY_WINDOW.blit(SCALE_WIN, (0, 0))
+            pygame.draw.rect(WINDOW, (41,41,41), pygame.Rect(55, 298, 8, 8))
         pygame.display.flip()
         wink+=1
     for i in range (50):
@@ -342,9 +336,7 @@ def start_animation():
         WINDOW.fill((255, 255, 255))
         WINDOW.blit(img_road, (road1.X, road1.Y))
         dino1.show()        
-        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(200+50*i, 0, 2560, 1080)) # 白色矩形向右移
-        SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
-        DISPLAY_WINDOW.blit(SCALE_WIN, (0, 0))
+        pygame.draw.rect(WINDOW, (255,255,255), pygame.Rect(100+25*i, 0, 1280, 540)) # 白色矩形向右移
         pygame.display.flip()
     obstacle1.update(obstacle2)
     obstacle2.update(obstacle1)
@@ -356,15 +348,13 @@ def gameover():
     global FRAME
     # 昼夜加载不同图片
     if NIGHT:
-        WINDOW.blit(img_fail_n, convert(dino1.X, dino1.Y, 184))
-        WINDOW.blit(img_gameover_n, (871, 350))
-        WINDOW.blit(img_restart_n, (1203, 550))
+        WINDOW.blit(img_fail_n, convert(dino1.X, dino1.Y, 92))
+        WINDOW.blit(img_gameover_n, (435, 175))
+        WINDOW.blit(img_restart_n, (601, 275))
     else:
-        WINDOW.blit(img_fail, convert(dino1.X, dino1.Y, 184))
-        WINDOW.blit(img_gameover, (871, 350))
-        WINDOW.blit(img_restart, (1203, 550))
-    SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
-    DISPLAY_WINDOW.blit(SCALE_WIN, (0, 0))
+        WINDOW.blit(img_fail, convert(dino1.X, dino1.Y, 92))
+        WINDOW.blit(img_gameover, (435, 175))
+        WINDOW.blit(img_restart, (601, 275))
     pygame.display.flip()
     pygame.mixer.Sound.play(snd_fail)
     if SCORE > HISTORY:
@@ -397,8 +387,8 @@ def menu():
     start_animation()
     obstacle1.update(obstacle2)
     obstacle2.update(obstacle1)
-    obstacle1.X=5000
-    obstacle2.X=8000
+    obstacle1.X=2500
+    obstacle2.X=4000
     # 等待按下空格
     while True:
         for event in pygame.event.get():
@@ -407,7 +397,7 @@ def menu():
         HISTORY=get_history_score()
         while GAMESTATE:
             clock = pygame.time.Clock()
-            clock.tick(144) #FPS
+            clock.tick(100) #FPS
             main()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -428,24 +418,24 @@ def main():
 
     ###############姿态控制###############
     INPUT = pygame.key.get_pressed()
-    #按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
+    # 按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
     if (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
     and not (dino1.ducking or dino1.jumping):
         pygame.mixer.Sound.play(snd_press)
         dino1.jumping = True
         max_jump_frame = 38
-        gravity = 13000
-        jump_speed = 2500
+        gravity = 8000
+        jump_speed = 1500
         jump_frame = max_jump_frame
-    #28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
+    # 28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
     elif (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
     and not (jump_frame > 30 or jump_frame < 28 or dino1.bigjump or dino1.ducking):
         dino1.bigjump = True
         max_jump_frame = 53
-        gravity = 11111
-        jump_speed = 3000
+        gravity = 8000
+        jump_speed = 2150
         jump_frame += 18
-    #快速下降或蹲下
+    # 快速下降或蹲下
     dino1.ducking = False
     if INPUT[pygame.K_DOWN]:
         if dino1.jumping:
@@ -454,7 +444,7 @@ def main():
             dino1.ducking = True
     #更新恐龙Y坐标
     if (jump_frame >= 0):
-        #状态为drop时不使用公式计算高度，以每帧30像素快速落地
+        # 状态为drop时不使用公式计算高度，以每帧30像素快速落地
         if(dino1.dropping):
             dino1.Y+=30
             if(dino1.Y>GROUND):
@@ -469,14 +459,14 @@ def main():
         dino1.bigjump = False
         dino1.dropping = False
     if dino1.ducking:
-        dino1.height = 111
+        dino1.height = 55
     else:
-        dino1.height = 184
+        dino1.height = 92
     ###############姿态控制###############
     # 障碍更新
-    if obstacle1.X <= -200:
+    if obstacle1.X <= -100:
         obstacle1.update(obstacle2)
-    if obstacle2.X <= -200:
+    if obstacle2.X <= -100:
         obstacle2.update(obstacle1)
     
     # 碰撞检测
@@ -504,17 +494,12 @@ def main():
     show_score(SCORE,HISTORY)
     if NIGHT:
         reverse_color()
-    if SCREEN_WIDTH < 2560:
-        SCALE_WIN = pygame.transform.scale(WINDOW, DISPLAY_WINDOW.get_size())
-        DISPLAY_WINDOW.blit(SCALE_WIN, (0, 0))
-    else:
-        DISPLAY_WINDOW.blit(WINDOW,(0,0))
     pygame.display.flip()
     # 速度调整
-    if SCORE in range(0,160): GAMESPEED = 15
-    if SCORE in range(160,320): GAMESPEED = 20
-    if SCORE in range(320,500): GAMESPEED = 25
-    if SCORE > 500 : GAMESPEED = 30
+    if SCORE in range(0,160): GAMESPEED = 10
+    if SCORE in range(160,320): GAMESPEED = 14
+    if SCORE in range(320,500): GAMESPEED = 17
+    if SCORE > 500 : GAMESPEED = 20
     if SCORE % 100 == 99:
         pygame.mixer.Sound.play(snd_reach_score)
 

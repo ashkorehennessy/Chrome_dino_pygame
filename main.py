@@ -3,7 +3,7 @@ import os
 import random
 
 GAMESTATE = True
-GAMESPEED = 20  # running speed
+GAMESPEED = 10  # running speed
 FRAME = 0  # frame
 SCORE = 0  # score
 HISTORY = 0  # highest score
@@ -115,9 +115,10 @@ class Obstacle:
     def update(self, another):
         self.X = another.X + random.randrange(1250, 3000)
         self.type = random.randrange(1, 9)
+        # 鸟的速度和高度随机
         if self.type > 6:
             self.Y = GROUND - random.randrange(0, 150)
-            self.speed = GAMESPEED + random.randrange(0, GAMESPEED // 7)
+            self.speed = GAMESPEED + random.randrange(0, GAMESPEED // 5)
         else:
             self.Y = GROUND
         match self.type:

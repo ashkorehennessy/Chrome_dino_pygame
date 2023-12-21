@@ -118,7 +118,7 @@ class Obstacle:
         # 鸟的速度和高度随机
         if self.type > 6:
             self.Y = GROUND - random.randrange(0, 150)
-            self.speed = GAMESPEED + random.randrange(0, GAMESPEED // 5)
+            self.speed = GAMESPEED + random.randrange(0, GAMESPEED // 4)
         else:
             self.Y = GROUND
         match self.type:
@@ -151,10 +151,7 @@ class Obstacle:
                 self.height = 77  # 鸟
 
     def show(self):
-        if self.type > 6:
-            self.X -= self.speed
-        else:
-            self.X -= GAMESPEED
+        self.X -= self.speed
         match self.type:
             case 1:
                 WINDOW.blit(img_cactus1, convert(self.X, self.Y, 71))  # 仙人掌1
@@ -187,6 +184,9 @@ class Obstacle:
             and dino.Y > self.Y - self.height \
             and dino.Y - dino1.height < self.Y
 
+    def change_speed(self, speed):
+        self.speed = speed
+
 
 class Background:
     def __init__(self, speed, X_min, X_max, Y_min, Y_max, imgs):
@@ -207,6 +207,9 @@ class Background:
             self.Y = random.randrange(self.Y_min, self.Y_max)
             self.img = random.choice(self.imgs)
         WINDOW.blit(self.img, (self.X, self.Y))
+
+    def change_speed(self, speed):
+        self.speed = speed
 
 
 class Cloud(Background):
@@ -278,6 +281,26 @@ star3 = Star()
 star4 = Star()
 moon = Moon()
 road1 = Road()
+
+
+def sync_speed():
+    if obstacle1.type > 6:
+        obstacle1.change_speed(GAMESPEED + random.randrange(0, GAMESPEED // 4))
+    else:
+        obstacle1.change_speed(GAMESPEED)
+    if obstacle2.type > 6:
+        obstacle2.change_speed(GAMESPEED + random.randrange(0, GAMESPEED // 4))
+    else:
+        obstacle2.change_speed(GAMESPEED)
+    cloud1.change_speed(GAMESPEED / 4)
+    cloud2.change_speed(GAMESPEED / 4)
+    cloud3.change_speed(GAMESPEED / 4)
+    cloud4.change_speed(GAMESPEED / 4)
+    star1.change_speed(GAMESPEED / 10)
+    star2.change_speed(GAMESPEED / 10)
+    star3.change_speed(GAMESPEED / 10)
+    star4.change_speed(GAMESPEED / 10)
+    moon.change_speed(GAMESPEED / 20)
 
 
 # 渐变反转颜色
@@ -527,8 +550,10 @@ def main():
     # 障碍更新
     if obstacle1.X <= -100:
         obstacle1.update(obstacle2)
+        sync_speed()
     if obstacle2.X <= -100:
         obstacle2.update(obstacle1)
+        sync_speed()
 
     # 碰撞检测
     if obstacle1.hitbox(dino1) or obstacle2.hitbox(dino1):
@@ -558,14 +583,18 @@ def main():
     pygame.display.flip()
 
     # 速度调整
-    if SCORE in range(0, 160):
+    if FRAME == 0:
         GAMESPEED = 10
-    if SCORE in range(160, 320):
+        sync_speed()
+    if FRAME == 800:
         GAMESPEED = 14
-    if SCORE in range(320, 500):
+        sync_speed()
+    if FRAME == 1600:
         GAMESPEED = 17
-    if SCORE > 500:
+        sync_speed()
+    if FRAME == 2500:
         GAMESPEED = 20
+        sync_speed()
     if SCORE % 100 == 99:
         pygame.mixer.Sound.play(snd_reach_score)
 

@@ -2,13 +2,20 @@ import pygame
 import os
 import random
 
-GAMESTATE = True
-GAMESPEED = 10  # running speed
-FRAME = 0  # frame
-SCORE = 0  # score
-HISTORY = 0  # highest score
-GROUND = 383  # 地面坐标
-NIGHT = False
+
+class Gamedata:
+    def __init__(self):
+        self.gamestate = True
+        self.gamespeed = 10  # running speed
+        self.frame = 0  # frame
+        self.score = 0  # score
+        self.highest_score = 0  # highest score
+        self.ground = 383  # 地面坐标
+        self.night = False
+
+
+gamedata = Gamedata()
+
 # init window
 pygame.init()
 SCREEN_WIDTH = pygame.display.Info().current_w
@@ -68,7 +75,7 @@ snd_reach_score = pygame.mixer.Sound(os.path.join("sounds", "score-reached.mp3")
 class DinoSaur:
     def __init__(self, X):
         self.X = X
-        self.Y = GROUND
+        self.Y = gamedata.ground
         self.length = 75
         self.height = 92
         self.jump_speed = 1500
@@ -112,11 +119,12 @@ class DinoSaur:
             # 状态为drop时不使用公式计算高度，以每帧30像素快速落地
             if self.dropping:
                 self.Y += 30
-                if self.Y > GROUND:
+                if self.Y > gamedata.ground:
                     self.jump_frame = 0
-                    self.Y = GROUND
+                    self.Y = gamedata.ground
             else:
-                self.Y = GROUND - (self.jump_speed * self.jump_frame / 100 - (self.gravity * self.jump_frame ** 2) / 20000)
+                self.Y = gamedata.ground - (
+                        self.jump_speed * self.jump_frame / 100 - (self.gravity * self.jump_frame ** 2) / 20000)
             self.jump_frame -= 1
         else:
             # 复原状态
@@ -129,7 +137,7 @@ class DinoSaur:
             self.height = 92
 
     def show(self):
-        if FRAME % 20 < 10:
+        if gamedata.frame % 20 < 10:
             index = 1
         else:
             index = 2
@@ -159,17 +167,17 @@ class Obstacle:
         self.Y = 0
         self.length = 0
         self.height = 0
-        self.speed = GAMESPEED
+        self.speed = gamedata.gamespeed
 
     def update(self, another):
         self.X = another.X + random.randrange(1250, 3000)
         self.type = random.randrange(1, 9)
         # 鸟的速度和高度随机
         if self.type > 6:
-            self.Y = GROUND - random.randrange(0, 150)
-            self.speed = GAMESPEED + random.randrange(0, GAMESPEED // 4)
+            self.Y = gamedata.ground - random.randrange(0, 150)
+            self.speed = gamedata.gamespeed + random.randrange(0, gamedata.gamespeed // 4)
         else:
-            self.Y = GROUND
+            self.Y = gamedata.ground
         match self.type:
             case 1:
                 self.length = 30
@@ -222,7 +230,7 @@ class Obstacle:
                 self.bird()  # 鸟
 
     def bird(self):
-        if FRAME % 20 < 10:
+        if gamedata.frame % 20 < 10:
             WINDOW.blit(img_bird1, convert(self.X, self.Y, 77))
         else:
             WINDOW.blit(img_bird2, convert(self.X, self.Y, 77))
@@ -263,7 +271,7 @@ class Background:
 
 class Cloud(Background):
     def __init__(self):
-        speed = GAMESPEED / 2
+        speed = gamedata.gamespeed / 2
         X_min = 500
         X_max = 1000
         Y_min = 100
@@ -274,7 +282,7 @@ class Cloud(Background):
 
 class Star(Background):
     def __init__(self):
-        speed = GAMESPEED / 5
+        speed = gamedata.gamespeed / 5
         X_min = 250
         X_max = 750
         Y_min = 50
@@ -285,7 +293,7 @@ class Star(Background):
 
 class Moon(Background):
     def __init__(self):
-        speed = GAMESPEED / 10
+        speed = gamedata.gamespeed / 10
         X_min = 1280
         X_max = 1281
         Y_min = 75
@@ -296,7 +304,7 @@ class Moon(Background):
 
     def show(self, another):
         self.X -= self.speed
-        if not NIGHT:
+        if not gamedata.night:
             self.current_img = (self.current_img + 1) % len(self.imgs)
             self.X = 1280
             self.Y = 75
@@ -307,12 +315,12 @@ class Moon(Background):
 class Road:
     def __init__(self):
         self.X = 0
-        self.Y = GROUND - 22
+        self.Y = gamedata.ground - 22
 
     def show(self):
         if self.X < -2560:
             self.X = 0
-        self.X -= GAMESPEED
+        self.X -= gamedata.gamespeed
         WINDOW.blit(img_road, (self.X, self.Y))
 
 
@@ -334,29 +342,29 @@ road1 = Road()
 
 def sync_speed():
     if obstacle1.type > 6:
-        obstacle1.change_speed(GAMESPEED + random.randrange(0, GAMESPEED // 4))
+        obstacle1.change_speed(gamedata.gamespeed + random.randrange(0, gamedata.gamespeed // 4))
     else:
-        obstacle1.change_speed(GAMESPEED)
+        obstacle1.change_speed(gamedata.gamespeed)
     if obstacle2.type > 6:
-        obstacle2.change_speed(GAMESPEED + random.randrange(0, GAMESPEED // 4))
+        obstacle2.change_speed(gamedata.gamespeed + random.randrange(0, gamedata.gamespeed // 4))
     else:
-        obstacle2.change_speed(GAMESPEED)
-    cloud1.change_speed(GAMESPEED / 4)
-    cloud2.change_speed(GAMESPEED / 4)
-    cloud3.change_speed(GAMESPEED / 4)
-    cloud4.change_speed(GAMESPEED / 4)
-    star1.change_speed(GAMESPEED / 10)
-    star2.change_speed(GAMESPEED / 10)
-    star3.change_speed(GAMESPEED / 10)
-    star4.change_speed(GAMESPEED / 10)
-    moon.change_speed(GAMESPEED / 20)
+        obstacle2.change_speed(gamedata.gamespeed)
+    cloud1.change_speed(gamedata.gamespeed / 4)
+    cloud2.change_speed(gamedata.gamespeed / 4)
+    cloud3.change_speed(gamedata.gamespeed / 4)
+    cloud4.change_speed(gamedata.gamespeed / 4)
+    star1.change_speed(gamedata.gamespeed / 10)
+    star2.change_speed(gamedata.gamespeed / 10)
+    star3.change_speed(gamedata.gamespeed / 10)
+    star4.change_speed(gamedata.gamespeed / 10)
+    moon.change_speed(gamedata.gamespeed / 20)
 
 
 # 渐变反转颜色
 def reverse_color():
     if not hasattr(reverse_color, "rgb"):
         reverse_color.rgb = 0
-    if SCORE % 1000 > 950:
+    if gamedata.score % 1000 > 950:
         reverse_color.rgb -= 1
     else:
         if reverse_color.rgb < 255:
@@ -398,7 +406,7 @@ def show_score(score, hi_score):
         "9": img_9
     }
     # 满足条件时score向下取整百
-    if score > 100 and GAMESTATE is True:
+    if score > 100 and gamedata.gamestate is True:
         if score % 100 < 30:
             score = score // 100 * 100
     score_str = "{:05d}".format(score)
@@ -418,10 +426,10 @@ def show_score(score, hi_score):
     WINDOW.blit(images[3], (1050, 50))
     WINDOW.blit(images[4], (1075, 50))
     # 满足条件时闪烁
-    if not (SCORE > 100 and GAMESTATE
-            and (0 < SCORE % 100 <= 5
-                 or 10 < SCORE % 100 <= 15
-                 or 20 < SCORE % 100 <= 25)):
+    if not (gamedata.score > 100 and gamedata.gamestate
+            and (0 < gamedata.score % 100 <= 5
+                 or 10 < gamedata.score % 100 <= 15
+                 or 20 < gamedata.score % 100 <= 25)):
         WINDOW.blit(images[5], (1125, 50))
         WINDOW.blit(images[6], (1150, 50))
         WINDOW.blit(images[7], (1175, 50))
@@ -478,12 +486,8 @@ def start_animation(dino, road):
 
 # 游戏结束界面
 def gameover():
-    global GAMESTATE
-    global GAMESPEED
-    global NIGHT
-    global FRAME
     # 昼夜加载不同图片
-    if NIGHT:
+    if gamedata.night:
         WINDOW.blit(img_fail_n, convert(dino1.X, dino1.Y, 92))
         WINDOW.blit(img_gameover_n, (435, 175))
         WINDOW.blit(img_restart_n, (601, 275))
@@ -493,10 +497,10 @@ def gameover():
         WINDOW.blit(img_restart, (601, 275))
     pygame.display.flip()
     pygame.mixer.Sound.play(snd_fail)
-    if SCORE > HISTORY:
+    if gamedata.score > gamedata.highest_score:
         with open("record.txt", "w") as file:
-            file.write(str(SCORE))
-    FRAME = 0
+            file.write(str(gamedata.score))
+    gamedata.frame = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -506,8 +510,8 @@ def gameover():
         INPUT = pygame.key.get_pressed()
         # 重新开始
         if INPUT[pygame.K_SPACE] is True:
-            GAMESTATE = True
-            GAMESPEED = 15
+            gamedata.gamestate = True
+            gamedata.gamespeed = 15
             obstacle1.update(obstacle2)
             obstacle2.update(obstacle1)
             break
@@ -515,9 +519,7 @@ def gameover():
 
 def menu():
     # 游戏初始化
-    global GAMESTATE
-    global HISTORY
-    HISTORY = get_history_score()
+    gamedata.highest_score = get_history_score()
     WINDOW.fill((255, 255, 255))
     pygame.display.flip()
     start_animation(dino1, road1)
@@ -530,8 +532,8 @@ def menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
-        HISTORY = get_history_score()
-        while GAMESTATE:
+        gamedata.highest_score = get_history_score()
+        while gamedata.gamestate:
             clock = pygame.time.Clock()
             clock.tick(100)  # FPS
             main()
@@ -543,11 +545,6 @@ def menu():
 
 def main():
     WINDOW.fill((255, 255, 255))
-    global SCORE
-    global FRAME
-    global GAMESTATE
-    global GAMESPEED
-    global NIGHT
 
     # 姿态控制
     INPUT = pygame.key.get_pressed()
@@ -565,18 +562,18 @@ def main():
 
     # 碰撞检测
     if obstacle1.hit(dino1) or obstacle2.hit(dino1):
-        GAMESTATE = False
+        gamedata.gamestate = False
 
     # 显示物体
-    if 700 <= SCORE % 1000 <= 999:
+    if 700 <= gamedata.score % 1000 <= 999:
         moon.show(moon)
         star1.show(star4)
         star2.show(star1)
         star3.show(star2)
         star4.show(star3)
-        NIGHT = True
+        gamedata.night = True
     else:
-        NIGHT = False
+        gamedata.night = False
     road1.show()
     cloud1.show(cloud4)
     cloud2.show(cloud1)
@@ -585,29 +582,29 @@ def main():
     obstacle1.show()
     obstacle2.show()
     dino1.show()
-    show_score(SCORE, HISTORY)
-    if NIGHT:
+    show_score(gamedata.score, gamedata.highest_score)
+    if gamedata.night:
         reverse_color()
     pygame.display.flip()
 
     # 速度调整
-    if FRAME == 0:
-        GAMESPEED = 10
+    if gamedata.frame == 0:
+        gamedata.gamespeed = 10
         sync_speed()
-    if FRAME == 800:
-        GAMESPEED = 14
+    if gamedata.frame == 800:
+        gamedata.gamespeed = 14
         sync_speed()
-    if FRAME == 1600:
-        GAMESPEED = 17
+    if gamedata.frame == 1600:
+        gamedata.gamespeed = 17
         sync_speed()
-    if FRAME == 2500:
-        GAMESPEED = 20
+    if gamedata.frame == 2500:
+        gamedata.gamespeed = 20
         sync_speed()
-    if SCORE % 100 == 99:
+    if gamedata.score % 100 == 99:
         pygame.mixer.Sound.play(snd_reach_score)
 
-    FRAME += 1
-    SCORE = int(FRAME / 5)
+    gamedata.frame += 1
+    gamedata.score = int(gamedata.frame / 5)
 
 
 if __name__ == "__main__":

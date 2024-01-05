@@ -179,10 +179,10 @@ class Obstacle:
             WINDOW.blit(img_bird2, convert(self.X, self.Y, 77))
 
     def hitbox(self, dino):
-        return dino.X + dino.length > self.X \
-            and dino.X < self.X + self.length \
-            and dino.Y > self.Y - self.height \
-            and dino.Y - dino1.height < self.Y
+        return (dino.X + dino.length > self.X
+                and dino.X < self.X + self.length
+                and dino.Y > self.Y - self.height
+                and dino.Y - dino1.height < self.Y)
 
     def change_speed(self, speed):
         self.speed = speed
@@ -503,8 +503,8 @@ def main():
     # 姿态控制
     INPUT = pygame.key.get_pressed()
     # 按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
-    if (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
-            and not (dino1.ducking or dino1.jumping):
+    if ((INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP])
+            and not (dino1.ducking or dino1.jumping)):
         pygame.mixer.Sound.play(snd_press)
         dino1.jumping = True
         max_jump_frame = 38
@@ -512,8 +512,8 @@ def main():
         jump_speed = 1500
         jump_frame = max_jump_frame
     # 28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
-    elif (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) \
-            and not (jump_frame > 30 or jump_frame < 28 or dino1.bigjump or dino1.ducking):
+    elif ((INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP])
+          and not (jump_frame > 30 or jump_frame < 28 or dino1.bigjump or dino1.ducking)):
         dino1.bigjump = True
         max_jump_frame = 53
         gravity = 8000

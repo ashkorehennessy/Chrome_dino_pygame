@@ -9,11 +9,6 @@ SCORE = 0  # score
 HISTORY = 0  # highest score
 GROUND = 383  # 地面坐标
 NIGHT = False
-jump_frame = 1
-jump_speed = 0
-gravity = 0  # 重力
-max_jump_frame = 54
-rgb = 0
 # init window
 pygame.init()
 SCREEN_WIDTH = pygame.display.Info().current_w
@@ -359,14 +354,15 @@ def sync_speed():
 
 # 渐变反转颜色
 def reverse_color():
-    global rgb
+    if not hasattr(reverse_color, "rgb"):
+        reverse_color.rgb = 0
     if SCORE % 1000 > 950:
-        rgb -= 1
+        reverse_color.rgb -= 1
     else:
-        if rgb < 255:
-            rgb += 1
+        if reverse_color.rgb < 255:
+            reverse_color.rgb += 1
     pixels = pygame.surfarray.pixels2d(WINDOW)
-    pixels ^= int(('{:02X}' * 3).format(rgb, rgb, rgb), 16)
+    pixels ^= int(('{:02X}' * 3).format(reverse_color.rgb, reverse_color.rgb, reverse_color.rgb), 16)
     del pixels
 
 

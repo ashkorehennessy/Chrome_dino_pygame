@@ -517,8 +517,8 @@ def main():
         dino1.bigjump = True
         max_jump_frame = 53
         gravity = 8000
-        jump_speed = 2150
-        jump_frame += 18
+        jump_speed = 1800
+        jump_frame += 9
     # 快速下降或蹲下
     dino1.ducking = False
     if INPUT[pygame.K_DOWN]:

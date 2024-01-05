@@ -76,10 +76,62 @@ class DinoSaur:
         self.Y = GROUND
         self.length = 75
         self.height = 92
+        self.jump_speed = 1500
+        self.jump_frame = 0
+        self.gravity = 8000
         self.jumping = False
         self.ducking = False
         self.dropping = False
+        self.standing = True
         self.bigjump = False
+
+    def jump(self, INPUT):
+        # 按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
+        if (INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP]) and not (self.ducking or self.jumping):
+            pygame.mixer.Sound.play(snd_press)
+            self.jumping = True
+            self.gravity = 8000
+            self.jump_speed = 1500
+            self.jump_frame = 38
+        # 28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
+        elif ((INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP])
+              and 28 < self.jump_frame < 30
+              and not (self.bigjump or self.ducking)):
+            self.bigjump = True
+            self.gravity = 8000
+            self.jump_speed = 1800
+            self.jump_frame += 9
+
+    def duck(self, INPUT):
+        # 快速下降或蹲下
+        self.ducking = False
+        if INPUT[pygame.K_DOWN]:
+            if self.jumping:
+                self.dropping = True
+            else:
+                self.ducking = True
+
+    def update(self):
+        # 更新恐龙Y坐标
+        if self.jump_frame >= 0:
+            # 状态为drop时不使用公式计算高度，以每帧30像素快速落地
+            if self.dropping:
+                self.Y += 30
+                if self.Y > GROUND:
+                    self.jump_frame = 0
+                    self.Y = GROUND
+            else:
+                self.Y = GROUND - (self.jump_speed * self.jump_frame / 100 - (self.gravity * self.jump_frame ** 2) / 20000)
+            self.jump_frame -= 1
+        else:
+            # 复原状态
+            self.jumping = False
+            self.bigjump = False
+            self.dropping = False
+        if self.ducking:
+            self.height = 55
+        else:
+            self.height = 92
 
     def show(self):
         if FRAME % 20 < 10:
@@ -90,6 +142,8 @@ class DinoSaur:
             index += 2
         if self.jumping:
             index += 4
+        if self.standing:
+            index = 0
         match index:
             case 1:
                 WINDOW.blit(img_running1, convert(self.X, self.Y, 92))
@@ -178,11 +232,11 @@ class Obstacle:
         else:
             WINDOW.blit(img_bird2, convert(self.X, self.Y, 77))
 
-    def hitbox(self, dino):
+    def hit(self, dino):
         return (dino.X + dino.length > self.X
                 and dino.X < self.X + self.length
                 and dino.Y > self.Y - self.height
-                and dino.Y - dino1.height < self.Y)
+                and dino.Y - dino.height < self.Y)
 
     def change_speed(self, speed):
         self.speed = speed
@@ -380,46 +434,50 @@ def show_score(score, hi_score):
 
 
 # 启动动画
-def start_animation():
+def start_animation(dino, road):
     clock = pygame.time.Clock()
     start = False
     font = pygame.font.Font('freesansbold.ttf', 15)
     text = font.render("Press space to play", True, (0, 0, 0))
     wink = 0
-    global jump_frame
-    jump_frame = 54
-    while jump_frame > 0:
+    # 等待按下空格
+    while start is False:
+        clock.tick(100)  # FPS
+        WINDOW.fill((255, 255, 255))
+        WINDOW.blit(img_road, (road.X, road.Y))
+        pygame.draw.rect(WINDOW, (255, 255, 255), pygame.Rect(100, 0, 1280, 540))  # 用白色矩形填充右侧屏幕
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
-        clock.tick(100)  # FPS
-        WINDOW.fill((255, 255, 255))
-        WINDOW.blit(img_road, (road1.X, road1.Y))
-        pygame.draw.rect(WINDOW, (255, 255, 255), pygame.Rect(100, 0, 1280, 540))  # 用白色矩形填充右侧屏幕
         INPUT = pygame.key.get_pressed()
-        # 等待，直到按下空格
-        if INPUT[pygame.K_SPACE]:
+        if INPUT[pygame.K_SPACE] is True:
             start = True
-        if start is True:
-            jump_frame -= 1
-            dino1.Y = GROUND - (2100 * jump_frame / 100 - (8000 * jump_frame ** 2) / 20000)  # 跳跃动画
-        else:
-            WINDOW.blit(text, (575, 242))
-        dino1.show()
+            dino.jump(INPUT)
+        dino.show()
+        WINDOW.blit(text, (575, 242))
         # 眨眼 
         if 800 < wink % 1000 <= 830:
             pygame.draw.rect(WINDOW, (41, 41, 41), pygame.Rect(55, 298, 8, 8))
-        pygame.display.flip()
         wink += 1
+        pygame.display.flip()
+    # 起跳
+    while dino.jumping:
+        clock.tick(100)
+        WINDOW.fill((255, 255, 255))
+        WINDOW.blit(img_road, (road.X, road.Y))
+        pygame.draw.rect(WINDOW, (255, 255, 255), pygame.Rect(100, 0, 1280, 540))  # 用白色矩形填充右侧屏幕
+        dino.update()
+        dino.show()
+        pygame.display.flip()
+    # 显示道路动画
     for i in range(50):
         clock.tick(200)
         WINDOW.fill((255, 255, 255))
-        WINDOW.blit(img_road, (road1.X, road1.Y))
-        dino1.show()
+        WINDOW.blit(img_road, (road.X, road.Y))
+        dino.show()
         pygame.draw.rect(WINDOW, (255, 255, 255), pygame.Rect(100 + 25 * i, 0, 1280, 540))  # 白色矩形向右移
         pygame.display.flip()
-    obstacle1.update(obstacle2)
-    obstacle2.update(obstacle1)
+    dino.standing = False
 
 
 # 游戏结束界面
@@ -466,8 +524,7 @@ def menu():
     HISTORY = get_history_score()
     WINDOW.fill((255, 255, 255))
     pygame.display.flip()
-    dino1.jumping = True
-    start_animation()
+    start_animation(dino1, road1)
     obstacle1.update(obstacle2)
     obstacle2.update(obstacle1)
     obstacle1.X = 2500
@@ -490,10 +547,6 @@ def menu():
 
 def main():
     WINDOW.fill((255, 255, 255))
-    global max_jump_frame
-    global jump_frame
-    global gravity
-    global jump_speed
     global SCORE
     global FRAME
     global GAMESTATE
@@ -502,50 +555,9 @@ def main():
 
     # 姿态控制
     INPUT = pygame.key.get_pressed()
-    # 按下空格或上方向键，并且未处于蹲下或跳跃状态，起跳
-    if ((INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP])
-            and not (dino1.ducking or dino1.jumping)):
-        pygame.mixer.Sound.play(snd_press)
-        dino1.jumping = True
-        max_jump_frame = 38
-        gravity = 8000
-        jump_speed = 1500
-        jump_frame = max_jump_frame
-    # 28 < jump_frame < 30时未松开空格或上方向键，且没有处于躲避和大跳状态，切换小跳为大跳
-    elif ((INPUT[pygame.K_SPACE] or INPUT[pygame.K_UP])
-          and not (jump_frame > 30 or jump_frame < 28 or dino1.bigjump or dino1.ducking)):
-        dino1.bigjump = True
-        max_jump_frame = 53
-        gravity = 8000
-        jump_speed = 1800
-        jump_frame += 9
-    # 快速下降或蹲下
-    dino1.ducking = False
-    if INPUT[pygame.K_DOWN]:
-        if dino1.jumping:
-            dino1.dropping = True
-        else:
-            dino1.ducking = True
-    # 更新恐龙Y坐标
-    if jump_frame >= 0:
-        # 状态为drop时不使用公式计算高度，以每帧30像素快速落地
-        if dino1.dropping:
-            dino1.Y += 30
-            if dino1.Y > GROUND:
-                jump_frame = 0
-                dino1.Y = GROUND
-        else:
-            dino1.Y = GROUND - (jump_speed * jump_frame / 100 - (gravity * jump_frame ** 2) / 20000)
-        jump_frame -= 1
-    else:
-        # 复原状态
-        dino1.jumping = False
-        dino1.bigjump = False
-        dino1.dropping = False
-    if dino1.ducking:
-        dino1.height = 55
-    else:
-        dino1.height = 92
+    dino1.jump(INPUT)
+    dino1.duck(INPUT)
+    dino1.update()
 
     # 障碍更新
     if obstacle1.X <= -100:
@@ -556,7 +568,7 @@ def main():
         sync_speed()
 
     # 碰撞检测
-    if obstacle1.hitbox(dino1) or obstacle2.hitbox(dino1):
+    if obstacle1.hit(dino1) or obstacle2.hit(dino1):
         GAMESTATE = False
 
     # 显示物体
